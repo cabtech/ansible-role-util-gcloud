@@ -1,4 +1,60 @@
 ---
-# empty main.yml for tasks 
-...
+- name: 'copy bash include file over'
+  copy:
+    src: gcloud.sh
+    dest: /usr/local/etc/bash.d/
+    owner: root
+    group: root
+    mode: 0644
+  become: true
+  tags:
+  - gcloud
+  - gcloud-bash
 
+- name: 'add public key of Google Cloud repo'
+  apt_key:
+    url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+    state: present
+  become: true
+  tags:
+  - gcloud
+  - gcloud-repo
+
+- name: 'Google Cloud repo = {{gcloud_state}} (TODO)'
+  apt_repository:
+    repo: deb http://packages.cloud.google.com/apt cloud-sdk-{{ct_codename}} main
+#   repo: deb http://packages.cloud.google.com/apt cloud-sdk-xenial main
+    state: '{{gcloud_state}}'
+    update_cache: true
+    validate_certs: true
+  when: false  # TODO
+  become: true
+  tags:
+  - gcloud
+  - gcloud-repo
+
+- name: 'Google Cloud SDK = {{gcloud_state}} (TODO)'
+  apt:
+    name: '{{gcloud_pkg}}'
+    update_cache: "{{ gcloud_state == 'present' | ternary(true, false) }}"
+    state: '{{gcloud_state}}'
+  when: false  # TODO
+  become: true
+  tags:
+  - gcloud
+  - gcloud-pkg
+
+- name: 'gcloud snap = {{gcloud_state}}'
+  snap:
+    name: 'google-cloud-sdk'
+    classic: true
+    state: '{{gcloud_state}}'
+  when:
+  - ct_distro == 'ubuntu'
+  - ct_distro_major | int >= 18
+  become: true
+  tags:
+  - gcloud
+  - gcloud-pkg
+  - gcloud-snap
+...

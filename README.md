@@ -2,7 +2,7 @@
 # ansible-role-util-gcloud
 
 ## Purpose
-Installs ...
+Installs Cloud SDK for GCP
 
 ## Required variables
 | name | purpose |
@@ -13,8 +13,10 @@ Installs ...
 | ---- | ------- |
 
 ## Defaulted variables
-| name | purpose |
-| ---- | ------- |
+| name | value | purpose |
+| ---- | ----- | ------- |
+| gcloud_state | present | whether to add or remove |
+| gcloud_pkg | google-cloud-sdk | packages to install |
 
 ## Supported Distros
 Ubuntu 16+

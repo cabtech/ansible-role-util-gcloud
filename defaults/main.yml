@@ -1,4 +1,4 @@
 ---
-# empty main.yml for defaults 
+gcloud_state: present
+gcloud_pkg: google-cloud-sdk
 ...
-
