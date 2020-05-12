@@ -8,41 +8,40 @@
     mode: 0644
   become: true
   tags:
-  - gcloud
-  - gcloud-bash
+  - ct-gcloud
 
 - name: 'add public key of Google Cloud repo'
   apt_key:
-    url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
     state: present
+    url: 'https://packages.cloud.google.com/apt/doc/apt-key.gpg'
+  when: gcloud_method == 'apt'
   become: true
   tags:
-  - gcloud
-  - gcloud-repo
+  - ct-gcloud
 
-- name: 'Google Cloud repo = {{gcloud_state}} (TODO)'
+- name: 'Google Cloud repo = {{gcloud_state}}'
   apt_repository:
-    repo: deb http://packages.cloud.google.com/apt cloud-sdk-{{ct_codename}} main
+    filename: 'google-cloud.sdk' 
+    repo: 'deb [signed-by=/usr/share/keyrings/cloud.google.gpg] http://packages.cloud.google.com/apt cloud-sdk main'
 #   repo: deb http://packages.cloud.google.com/apt cloud-sdk-xenial main
     state: '{{gcloud_state}}'
-    update_cache: true
     validate_certs: true
-  when: false  # TODO
+  when: gcloud_method == 'apt'
+  register: reg_gcloud_repo
   become: true
   tags:
-  - gcloud
-  - gcloud-repo
+  - ct-gcloud
 
-- name: 'Google Cloud SDK = {{gcloud_state}} (TODO)'
+- name: 'Google Cloud SDK = {{gcloud_state}}'
   apt:
     name: '{{gcloud_pkg}}'
-    update_cache: "{{ gcloud_state == 'present' | ternary(true, false) }}"
+    update_cache: '{{ reg_gcloud_repo is changed }}'
     state: '{{gcloud_state}}'
-  when: false  # TODO
+  when: gcloud_method == 'apt'
+  ignore_errors: '{{ansible_check_mode | bool}}'
   become: true
   tags:
-  - gcloud
-  - gcloud-pkg
+  - ct-gcloud
 
 - name: 'gcloud snap = {{gcloud_state}}'
   snap:
@@ -52,9 +51,8 @@
   when:
   - ct_distro == 'ubuntu'
   - ct_distro_major | int >= 18
+  - gcloud_method == 'snap'
   become: true
   tags:
-  - gcloud
-  - gcloud-pkg
-  - gcloud-snap
+  - ct-gcloud
 ...
