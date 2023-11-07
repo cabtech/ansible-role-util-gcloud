@@ -1,5 +1,9 @@
 ---
-gcloud_state: present
+# --------------------------------
+
 gcloud_method: apt  # or snap
 gcloud_pkg: google-cloud-sdk
+gcloud_state: present
+
+# --------------------------------
 ...
