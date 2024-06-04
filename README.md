@@ -1,6 +1,7 @@
 ----
 # Purpose
 Installs Google Cloud SDK
+
 ![Lint](https://github.com/cabtech/ansible-role-util-gcloud/actions/workflows/lint-ansible.yml/badge.svg)
 
 ## Defaulted variables
