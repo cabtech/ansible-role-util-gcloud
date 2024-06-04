@@ -3,43 +3,43 @@
 
 - name: "Copy bash include file over"
   ansible.builtin.copy:
-    src: gcloud.sh
     dest: /usr/local/etc/bash.d/
-    owner: root
     group: root
-    mode: 0644
+    mode: "0644"
+    owner: root
+    src: gcloud.sh
   become: true
-  tags: [ct-gcloud]
+  tags: ["ct-gcloud"]
 
 - name: "Add public key of Google Cloud repo"
-  ansible.builtin.apt_key:
-    state: present
-    url: "https://packages.cloud.google.com/apt/doc/apt-key.gpg"
+  ansible.builtin.get_url:
+    dest: "{{ gcloud_keyring_path }}"
+    mode: "0644"
+    url: "{{ gcloud_keyring_url }}"
   when: gcloud_method == "apt"
   become: true
-  tags: [ct-gcloud]
+  tags: ["ct-gcloud"]
 
 - name: "GCP repo"
   ansible.builtin.apt_repository:
     filename: "google-cloud.sdk"
-    repo: "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] http://packages.cloud.google.com/apt cloud-sdk main"
-    # repo: deb http://packages.cloud.google.com/apt cloud-sdk-xenial main
+    repo: "deb [signed-by={{ gcloud_keyring_path }}] {{ gcloud_repo_url }} cloud-sdk main"
     state: "{{ gcloud_state }}"
     validate_certs: true
   when: gcloud_method == "apt"
   register: reg_gcloud_repo
   become: true
-  tags: [ct-gcloud]
+  tags: ["ct-gcloud"]
 
-- name: "Manage GCP SDK using apt"
+- name: "Install packages"
   ansible.builtin.apt:
-    name: "{{ gcloud_pkg }}"
+    name: "{{ gcloud_pkgs }}"
     update_cache: "{{ reg_gcloud_repo is changed }}"
     state: "{{ gcloud_state }}"
   when: gcloud_method == "apt"
   ignore_errors: "{{ ansible_check_mode | bool }}"
   become: true
-  tags: [ct-gcloud]
+  tags: ["ct-gcloud"]
 
 - name: "Manage GCP SDK using snap"
   community.general.snap:
@@ -47,11 +47,11 @@
     classic: true
     state: "{{ gcloud_state }}"
   when:
-  - ct_distro == "ubuntu"
-  - ct_distro_major | int >= 18
+  - ansible_distrobution == "Ubuntu"
+  - (ansible_distrobution_major_version.split('.')[0] | int) >= 18
   - gcloud_method == "snap"
   become: true
-  tags: [ct-gcloud]
+  tags: ["ct-gcloud"]
 
 # --------------------------------
 ...
