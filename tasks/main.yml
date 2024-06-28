@@ -47,8 +47,8 @@
     classic: true
     state: "{{ gcloud_state }}"
   when:
-  - ansible_distrobution == "Ubuntu"
-  - (ansible_distrobution_major_version.split('.')[0] | int) >= 18
+  - ansible_distribution == "Ubuntu"
+  - (ansible_distribution_major_version.split('.')[0] | int) >= 18
   - gcloud_method == "snap"
   become: true
   tags: ["ct-gcloud"]
